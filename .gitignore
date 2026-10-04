@@ -1,4 +1,7 @@
 .venv
 .env
 .DS_store
-datastore
+datastore/
+chroma_db/
+*.egg-info
+__pycache__
