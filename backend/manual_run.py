@@ -1,6 +1,6 @@
 import os
-from core.upload_service.parser import extract_resume_text
-from core.upload_service.chroma_service import chroma_service
+from core.ingestion.parser import extract_resume_text
+from core.ingestion.chroma_service import chroma_service
 
 def run_local_ingestion(paths: list[str]):
     print("Initializing local execution framework...")
