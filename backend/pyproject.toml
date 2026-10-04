@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "interviewee"
+version = "0.1.0"
+description = "AI System for Querying Candidate Profiles"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.1",
+    "chromadb>=0.5.3",
+    "openai>=1.35.3",
+    "pdfplumber>=0.11.1",
+    "python-docx>=1.1.2",
+    "pydantic-settings>=2.3.4",
+    "python-multipart>=0.0.9",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["api*", "core*"]
