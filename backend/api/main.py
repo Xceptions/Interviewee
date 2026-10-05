@@ -1,7 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from langchain_core.messages import HumanMessage, AIMessage
 from core.agent.graph import interview_agent
+import shutil
+import os
+from parser import extract_resume_text
+from chroma_service import chroma_service
 
 app = FastAPI(title="AI Interviewer Agent API")
 
@@ -71,5 +75,44 @@ async def chat_interview(payload: ChatRequest):
             stage=latest_state.get("stage", "interviewing"),
             count=latest_state.get("count", 0)
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/resumes/upload")
+async def upload_resume(file: UploadFile = File(...)):
+    temp_dir = "temp_uploads"
+    os.makedirs(temp_dir, exist_ok=True)
+    file_path = os.path.join(temp_dir, file.filename)
+    
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        file_text = extract_resume_text(file_path)
+        candidate_id = chroma_service.ingest_resume(file_text, file.filename)
+        
+        return {"candidate_id": candidate_id, "filename": file.filename, "status": "Ingested successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+@app.get("/resumes")
+async def list_resumes():
+    try:
+        data = chroma_service.collection.get(include=["metadatas"])
+        metadatas = data.get("metadatas", [])
+        
+        seen = set()
+        unique_resumes = []
+        for meta in metadatas:
+            if meta and "source_file" in meta and meta["source_file"] not in seen:
+                seen.add(meta["source_file"])
+                unique_resumes.append({
+                    "filename": meta["source_file"],
+                    "candidate_id": meta.get("candidate_id")
+                })
+        return unique_resumes
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
