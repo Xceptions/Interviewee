@@ -1,4 +1,4 @@
-# AI Interviewer Agent (LangGraph + RAG + React)
+# Interviewee - Helen Reece (LangGraph + RAG + React)
 
 A production-grade, local-first interactive job screening interview platform. The application uses an asynchronous **LangGraph state workflow loop** coupled with a **ChromaDB vector store** context retrieval component to evaluate candidate resumes using local **Ollama** LLM instances.
 
